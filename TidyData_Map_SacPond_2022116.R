@@ -48,6 +48,8 @@ usa <- subset(ne_countries(scale = 'medium',
 # > Collection Sites ####
 SampleLoc1 <- read.csv("./SampleLocations2019_ElodeaStudySacPond_20210923.csv")
 
+
+
 # > Elodea Buckets ####
 ElodeaBuckets <- st_as_sf(
   data.frame(
@@ -67,29 +69,13 @@ SACpond_WGS <- st_transform(SACpond,
                             WGS84_crs)
 
 # Convert to UTM
-SACpond_NAD <- st_transform(SACpond_WGS,
+SACpond_NAD <- st_transform(SACpond,
                             NAD83_crs)
 
 # > Alaska ####
 # Convert to WGS84
 usa_WGS <- st_transform(usa,
                         WGS84_crs)
-
-# Convert to UTM
-usa_NAD <- st_transform(usa_WGS,
-                        NAD83_crs)
-
-
-
-
-
-# Crop --------------------------------------------------------------------
-# > Alaska ####
-AK_NAD_Crop <- st_crop(usa_NAD,
-                       c(xmin = -1714134,
-                         ymin = 5739691,
-                         xmax = 1581606,
-                         ymax = 8239691))
 
 
 
@@ -108,20 +94,25 @@ grid_12.5 <- st_make_grid(SACpond_NAD,
 # > Alaska map ####
 Alaska_plot <- ggplot() +
   
-  geom_sf(data = AK_NAD_Crop,
+  geom_sf(data = usa,
           fill = "white") +
+
+  geom_sf(data = st_bbox(
+    st_buffer(SACpond_WGS,
+              dist = 10000)) %>% # add buffer so we can see on map
+      st_as_sfc() %>%
+      st_as_sf(),
+    fill = "black") + 
+  
+  scale_x_continuous(breaks = seq(-180, -130, 
+                                  by = 10)) +
   
   scale_y_continuous(breaks = seq(50, 70, 
                                   by = 5)) +
   
-  scale_x_continuous(breaks = seq(-170, -130, 
-                                  by = 10)) +
-  
-  geom_sf(data = st_bbox(st_buffer(SACpond_NAD,
-                                   dist = 10000)) %>% # add buffer so we can see on map
-            st_as_sfc() %>%
-            st_as_sf(), 
-          fill = "black") + 
+  coord_sf(xlim = c(-175, -125), 
+           ylim = c(50, 75),
+           crs = WGS84_crs) +
   
   theme_bw()
 
@@ -160,13 +151,6 @@ SACpond_plot <- ggplot() +
           mapping = aes(geometry = geometry),
           fill = NA) +
   
-  geom_sf(data = ElodeaBuckets,
-          aes(geometry = geometry),
-          size = 2,
-          fill = "#6E6E6E",
-          color = "black",
-          pch = 23) +
-  
   geom_sf(data = grid_12.5, 
           fill = NA) +
   
@@ -195,6 +179,13 @@ SACpond_plot <- ggplot() +
     pch = 20,
     size = 2,
     color = "red") +
+  
+  geom_sf(data = ElodeaBuckets,
+          aes(geometry = geometry),
+          size = 2,
+          fill = "#6E6E6E",
+          color = "black",
+          pch = 23) +
   
   ggspatial::annotation_scale(
     location = "tr",
