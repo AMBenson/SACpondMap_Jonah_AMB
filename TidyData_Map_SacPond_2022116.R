@@ -18,6 +18,7 @@ library(cowplot)# for ggdraw to manipulat margins ets
 # library(plotKML)#for read.GPX
 # library(tmap) #one of many packages for insetting maps
 library(ggsn)
+library(dplyr)
 
 
 
@@ -61,7 +62,7 @@ ElodeaBuckets <- st_as_sf(
 
 
 
-
+  
 # Reproject to UTM --------------------------------------------------------
 # > Pond #### 
 # Convert to WGS84
@@ -69,8 +70,10 @@ SACpond_WGS <- st_transform(SACpond,
                             WGS84_crs)
 
 # Convert to UTM
-SACpond_NAD <- st_transform(SACpond,
+SACpond_NAD <- st_transform(SACpond_WGS,
                             NAD83_crs)
+
+
 
 # > Alaska ####
 # Convert to WGS84
@@ -79,12 +82,33 @@ usa_WGS <- st_transform(usa,
 
 
 
+# > Sample points ####
+SampleLoc_Nad83 <- st_transform(
+  st_as_sf(SampleLoc1,
+           coords = c("x.actualsamplelocation_utm","y.actualsamplelocation_utm"),
+           crs = "+proj=utm +zone=6 +ellps=WGS84"),
+                           crs = NAD83_crs)
 
 
-# Great Grid --------------------------------------------------------------
+
+
+
+# Create Grid --------------------------------------------------------------
 grid_12.5 <- st_make_grid(SACpond_NAD,
                           cellsize = c(12.5, 12.5)) %>% # 12.5 square meters
   st_sf(grid_id = 1:length(.))
+
+
+
+# > Identify grid cells sampled ####
+index <- which(lengths(st_intersects(grid_12.5,
+                  SampleLoc_Nad83)) > 0)
+
+
+
+# > Select grid cells sampled ####
+grid_sampled <- grid_12.5$.[index] %>% 
+  st_as_sf()
 
 
 
@@ -110,11 +134,12 @@ Alaska_plot <- ggplot() +
   scale_y_continuous(breaks = seq(50, 70, 
                                   by = 5)) +
   
-  coord_sf(xlim = c(-175, -125), 
-           ylim = c(50, 75),
+  coord_sf(xlim = c(-175, -130), 
+           ylim = c(50, 73),
            crs = WGS84_crs) +
   
   theme_bw()
+
 
 
 # This rectangle isn't the actual size of the study area grid 
@@ -122,63 +147,44 @@ Alaska_plot <- ggplot() +
 
 # Alaska_plot <- ggplot() +
 #   
-#   geom_sf(data = st_buffer(SACpond_NAD,
-#                            dist = 10000) %>% # add buffer so we can see on map
-#             st_as_sfc() %>%
-#             st_as_sf(),
-#           fill = "black") +
+#   geom_sf(data = usa,
+#           fill = "white") +
+#   
+#   geom_sf(data = st_buffer(
+#     SACpond_WGS,
+#     dist = 10000) %>% # add buffer so we can see on map
+#       st_as_sfc() %>%
+#       st_as_sf(),
+#     fill = "black") + 
+#   
+#   scale_x_continuous(breaks = seq(-180, -130, 
+#                                   by = 10)) +
 #   
 #   scale_y_continuous(breaks = seq(50, 70, 
 #                                   by = 5)) +
 #   
-#   scale_x_continuous(breaks = seq(-170, -130, 
-#                                   by = 10)) +
-#   
-#   geom_sf(data = st_bbox(st_buffer(SACpond_NAD,
-#                                    dist = 10000)) %>% # add buffer so we can see on map
-#             st_as_sfc() %>%
-#             st_as_sf(), 
-#           fill = "black") + 
+#   coord_sf(xlim = c(-175, -130), 
+#            ylim = c(50, 73),
+#            crs = WGS84_crs) +
 #   
 #   theme_bw()
+
 
 
 
 # > Study area map ####
 SACpond_plot <- ggplot() +
   
-  geom_sf(data = SACpond_NAD,
-          mapping = aes(geometry = geometry),
-          fill = NA) +
-  
   geom_sf(data = grid_12.5, 
           fill = NA) +
   
-  geom_sf(data = st_as_sf(
-    data.frame(
-      # lon = SampleLoc1$y.actualsamplelocation_utm,
-      # lat = SampleLoc1$x.actualsamplelocation_utm),
-      lon = SampleLoc1$y.gridmidpoint_utm,
-      lat = SampleLoc1$x.gridmidpoint_utm),
-    coords = c("lat","lon"),
-    crs = NAD83_crs),
-    aes(geometry = geometry),
+  geom_sf(data = grid_sampled,
+          fill = "grey") +
+  
+  geom_sf(data = SampleLoc_Nad83,
     pch = 20,
     size = 2,
     color = "black") +
-  
-  geom_sf(data = st_as_sf(
-    data.frame(
-      lon = SampleLoc1$y.actualsamplelocation_utm,
-      lat = SampleLoc1$x.actualsamplelocation_utm),
-    # lon = SampleLoc1$y.gridmidpoint_utm,
-    # lat = SampleLoc1$x.gridmidpoint_utm),
-    coords = c("lat","lon"),
-    crs = NAD83_crs),
-    aes(geometry = geometry),
-    pch = 20,
-    size = 2,
-    color = "red") +
   
   geom_sf(data = ElodeaBuckets,
           aes(geometry = geometry),
@@ -186,6 +192,10 @@ SACpond_plot <- ggplot() +
           fill = "#6E6E6E",
           color = "black",
           pch = 23) +
+
+  geom_sf(data = SACpond_NAD,
+          mapping = aes(geometry = geometry),
+          fill = NA) +
   
   ggspatial::annotation_scale(
     location = "tr",
