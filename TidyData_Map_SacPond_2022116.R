@@ -219,41 +219,135 @@ SACpond_plot <- ggplot() +
 
 
 
+# > North Elodea Bucket ####
+Elodea_N_plot <- ggplot() +
+  
+  geom_sf(data = SampleLoc_Nad83,
+          pch = 20,
+          size = 2,
+          color = "black") +
+  
+  geom_sf(data = ElodeaBuckets,
+          aes(geometry = geometry),
+          size = 2,
+          fill = "#6E6E6E",
+          color = "black",
+          pch = 23) +
+  
+  coord_sf(xlim = c(468524.1, 468530.1),       
+           ylim = c(7187594, 7187601),
+           crs = NAD83_crs) +
+  
+  ggspatial::annotation_scale(
+    location = "tr",
+    bar_cols = c("grey60", "white"),
+    text_family = "ArcherPro Book") +
+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        plot.background = element_rect(color = "black", linewidth = 1))
+
+
+
+# > South Elodea Bucket ####
+Elodea_S_plot <- ggplot() +
+  
+  geom_sf(data = SampleLoc_Nad83,
+          pch = 20,
+          size = 2,
+          color = "black") +
+  
+  geom_sf(data = ElodeaBuckets,
+          aes(geometry = geometry),
+          size = 2,
+          fill = "#6E6E6E",
+          color = "black",
+          pch = 23) +
+  
+  coord_sf(xlim = c(468569.7, 468574.7), 
+           ylim = c(7187241, 7187247),
+           crs = NAD83_crs) +
+  
+  ggspatial::annotation_scale(
+    location = "tr",
+    bar_cols = c("grey60", "white"),
+    text_family = "ArcherPro Book") +
+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        plot.background = element_rect(color = "black", linewidth = 1))
+
+
 # > Put it together ####
 SACpond_InsetMap <- ggdraw(xlim = c(0, 28),
                            ylim = c(0, 20)) +
   
-  draw_plot(SACpond_plot,
-            x = 0,
-            y = 0,
-            width = 23,
-            height = 20) +
-  
   draw_plot(Alaska_plot,
-            x = 15,
+            x = 0,
             y = 10,
             width = 10,
+            height = 10) +
+  
+  draw_plot(SACpond_plot,
+            x = 8,
+            y = 0,
+            width = 15, # 23,
+            height = 20) + #20) +
+  
+  draw_plot(Elodea_N_plot,
+            x = 22,
+            y = 10,
+            width = 5,
+            height = 10) +
+  
+  draw_plot(Elodea_S_plot,
+            x = 22,
+            y = 0,
+            width = 5,
             height = 10) +
   
   geom_segment(aes(x = x2,
                    y = y2,
                    xend = x1,
                    yend = y1),
-               data = data.frame(x1 = 21.3,
+               data = data.frame(x1 = 6.5,
+                                 x2 = 7.5,
+                                 y1 = 16.4,
+                                 y2 = 17.4),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
+               lineend = "butt",
+               linewidth = 0.5) +
+  
+  geom_segment(aes(x = x2,
+                   y = y2,
+                   xend = x1,
+                   yend = y1),
+               data = data.frame(x1 = 22,
                                  x2 = 13,
-                                 y1 = 15.5,
-                                 y2 = 11.3),
-                        arrow = arrow(type = "closed",
-                                      length = unit(.1, "inches")),
+                                 y1 = 15,
+                                 y2 = 18.2),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
+               lineend = "butt",
+               linewidth = 0.5) +
+  
+  geom_segment(aes(x = x2,
+                   y = y2,
+                   xend = x1,
+                   yend = y1),
+               data = data.frame(x1 = 22,
+                                 x2 = 15.2,
+                                 y1 = 5.5,
+                                 y2 = 3.6),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
                lineend = "butt",
                linewidth = 0.5)
-
-
-ggsave(plot = SACpond_InsetMap,
-       width = 6,
-       height = 4,
-       dpi = 600,
-       filename = "./Figures/SACpond_InsetMap.jpg")
 
 
 
