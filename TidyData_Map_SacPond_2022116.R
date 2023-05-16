@@ -8,15 +8,9 @@
 
 # Libraries ---------------------------------------------------------------
 library(sf)
-# library(raster)
-# library(rgdal)
-# library(RColorBrewer)
 library(ggplot2)
 library(rnaturalearth)
-# library(rnaturalearthdata)
 library(cowplot)# for ggdraw to manipulat margins ets
-# library(plotKML)#for read.GPX
-# library(tmap) #one of many packages for insetting maps
 library(ggsn)
 library(dplyr)
 
@@ -142,36 +136,6 @@ Alaska_plot <- ggplot() +
 
 
 
-# This rectangle isn't the actual size of the study area grid 
-# (misrepresentation). Keep or revert to point? 
-
-# Alaska_plot <- ggplot() +
-#   
-#   geom_sf(data = usa,
-#           fill = "white") +
-#   
-#   geom_sf(data = st_buffer(
-#     SACpond_WGS,
-#     dist = 10000) %>% # add buffer so we can see on map
-#       st_as_sfc() %>%
-#       st_as_sf(),
-#     fill = "black") + 
-#   
-#   scale_x_continuous(breaks = seq(-180, -130, 
-#                                   by = 10)) +
-#   
-#   scale_y_continuous(breaks = seq(50, 70, 
-#                                   by = 5)) +
-#   
-#   coord_sf(xlim = c(-175, -130), 
-#            ylim = c(50, 73),
-#            crs = WGS84_crs) +
-#   
-#   theme_bw()
-
-
-
-
 # > Study area map ####
 SACpond_plot <- ggplot() +
   
@@ -181,7 +145,7 @@ SACpond_plot <- ggplot() +
   geom_sf(data = grid_sampled,
           fill = "grey") +
   
-  geom_sf(data = SampleLoc_Nad83,
+  geom_sf(data = SampleLoc_Nad83, # Overlay actual sample points
     pch = 20,
     size = 2,
     color = "black") +
@@ -380,55 +344,3 @@ SACpond_InsetMap <- ggdraw(xlim = c(0, 28),
 # SampleLoc <- data.frame( 
 #   lon = SampleLoc1$y.actualsamplelocation_utm, 
 #   lat = SampleLoc1$x.actualsamplelocation_utm)
-# 
-# 
-#   
-#   
-#   alaska+
-#     geom_rect(data = data.frame( xmin = 467000,
-#                                  xmax = 469999,
-#                                  ymin = 7186187,
-#                                  ymax = 7188187),
-#               aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-#               fill = "grey", colour="black", size=3) 
-#   
-#     geom_rect(aes(xmin = 467000,
-#                   xmax = 469999,
-#                   ymin = 7186187,
-#                   ymax = 7188187),
-#               fill = xmin,colour = "black", size = 2)
-#   
-#   ##TRying to use this example for
-#  geom_rect(data = data.frame( xmin = 467488,
-#                               xmax = 469671,
-#                               ymin = 7186187,
-#                               ymax = 7188187),
-#             aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
-#             fill = "grey", alpha = 0.5, size=10) +
-#   
-#   ############################################
-#   SACpond_InsetMap<-
-#     ggdraw(xlim = c(0, 28), ylim = c(0, 20)) +
-#     draw_plot(alaska,x = 0, y = 0, width = 20, height = 20 )+
-#     draw_plot(SACpond_map,x = 15, y = 7.4, width = 5, height = 10) 
-#     
-#   ggsave(plot =  SACpond_InsetMap, width = 6, height = 4, dpi = 300, filename = "C:/Users/AMBenson/Documents/CGL/eDNA/SACPond_Elodea_eDNA/Publication/Map_final_ForPublication_20221115/SACpond_InsetMap.jpg")
-#   
-#   
-#  #SACpond big
-#  SACpond_InsetMap<-
-#     ggdraw(xlim = c(0, 28), ylim = c(0, 20)) +
-#     draw_plot(SACpond_map,x = 0, y = 0, width = 18, height = 18 ) +
-#     draw_plot(alaska,x = 9, y = 15.25, width = 10, height = 6)
-#   
-#   
-#    
-# ##Draw an arrow pointin inset to big map
-#     geom_segment(aes(x = x2, y = y2, xend = x1, yend = y1), data = arrow, 
-#                  arrow = arrow(), lineend = "round") 
-#  
-#     arrow <- data.frame(x1 = 15.3, x2 = 16.9, y1 = 14, y2 = 18.8) ##use an arrow and ggdraw
-#   
-#   ggdraw(xlim = c(0, 28), ylim = c(0, 20)) +
-#     draw_plot(SACpond_map,x = 0, y = 0, width = 20, height = 20 ) +
-#     draw_plot(alaska,x = 20, y = 11.25, width = 8, height = 8) +
