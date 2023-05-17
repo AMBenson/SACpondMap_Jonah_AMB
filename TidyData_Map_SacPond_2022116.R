@@ -13,6 +13,8 @@ library(rnaturalearth)
 library(cowplot)# for ggdraw to manipulat margins ets
 library(ggsn)
 library(dplyr)
+library(rgdal)
+library(sp)
 
 
 
@@ -29,7 +31,10 @@ WGS84_crs <- ("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
 
 # Import data -------------------------------------------------------------
 # > Pond ####
-SACpond <- read_sf("./Spatial/Gravel_Pit_SAC.shp") 
+# Deprecated so map and grid align with study design
+# SACpond <- read_sf("./Spatial/Gravel_Pit_SAC.shp") 
+SACpond <- readOGR(dsn = "./Spatial",
+                   layer = "Gravel_Pit_SAC")##read vector map into a spatial object
 
 
 
@@ -60,7 +65,8 @@ ElodeaBuckets <- st_as_sf(
 # Reproject to UTM --------------------------------------------------------
 # > Pond #### 
 # Convert to WGS84
-SACpond_WGS <- st_transform(SACpond,
+SACpond_WGS <- st_transform(SACpond %>% 
+                              st_as_sf(),
                             WGS84_crs)
 
 # Convert to UTM
@@ -88,9 +94,36 @@ SampleLoc_Nad83 <- st_transform(
 
 
 # Create Grid --------------------------------------------------------------
-grid_12.5 <- st_make_grid(SACpond_NAD,
-                          cellsize = c(12.5, 12.5)) %>% # 12.5 square meters
-  st_sf(grid_id = 1:length(.))
+# Deprecated. Building grid the way it was originally done to match sampling
+# design.
+
+# grid_12.5 <- st_make_grid(SACpond_NAD,
+#                           cellsize = c(12.5, 12.5)) %>% # 12.5 square meters
+#   st_sf(grid_id = 1:length(.))
+
+bb = SACpond@bbox #= boundary box
+
+x <- seq(from = bb[1,1], 
+         to = bb[1,2], 
+         by = 12.5) 
+
+y <- seq(from = bb[2,1], 
+         to = 7187612.9, 
+         by = 12.5)
+
+## create a grid of all pairs of coordinates (as a data.frame) 
+xy <- expand.grid(x = x, 
+                  y = y)
+
+grid.pts <- SpatialPointsDataFrame(coords = xy, 
+                                   data = xy, 
+                                   proj4string = CRS(NAD83_crs))
+
+#Make points a gridded object (i.e., TRUE or FALSE)
+gridded(grid.pts) <- TRUE
+
+grid_12.5 <- as(grid.pts, "SpatialPolygons") %>%
+  st_as_sf()
 
 
 
@@ -101,7 +134,7 @@ index <- which(lengths(st_intersects(grid_12.5,
 
 
 # > Select grid cells sampled ####
-grid_sampled <- grid_12.5$.[index] %>% 
+grid_sampled <- grid_12.5$geometry[index] %>% 
   st_as_sf()
 
 
@@ -145,10 +178,10 @@ SACpond_plot <- ggplot() +
   geom_sf(data = grid_sampled,
           fill = "grey") +
   
-  geom_sf(data = SampleLoc_Nad83, # Overlay actual sample points
-    pch = 20,
-    size = 2,
-    color = "black") +
+  # geom_sf(data = SampleLoc_Nad83, # Overlay actual sample points
+  #   pch = 20,
+  #   size = 2,
+  #   color = "black") +
   
   geom_sf(data = ElodeaBuckets,
           aes(geometry = geometry),
@@ -313,7 +346,11 @@ SACpond_InsetMap <- ggdraw(xlim = c(0, 28),
                lineend = "butt",
                linewidth = 0.5)
 
-
+ggsave(filename = "./Figures/SACpond_InsertMap.jpg",
+       plot = SACpond_InsetMap,
+       dpi = 600,
+       width = 8,
+       height = 7)
 
 
 
