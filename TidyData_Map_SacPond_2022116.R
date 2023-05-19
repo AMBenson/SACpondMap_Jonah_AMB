@@ -85,7 +85,8 @@ usa_WGS <- st_transform(usa,
 # > Sample points ####
 SampleLoc_Nad83 <- st_transform(
   st_as_sf(SampleLoc1,
-           coords = c("x.actualsamplelocation_utm","y.actualsamplelocation_utm"),
+           # coords = c("x.actualsamplelocation_utm","y.actualsamplelocation_utm"),
+           coords = c("x.gridmidpoint_utm", "y.gridmidpoint_utm"),
            crs = "+proj=utm +zone=6 +ellps=WGS84"),
                            crs = NAD83_crs)
 
@@ -219,7 +220,10 @@ SACpond_plot <- ggplot() +
 # > North Elodea Bucket ####
 Elodea_N_plot <- ggplot() +
   
-  geom_sf(data = SampleLoc_Nad83,
+  geom_sf(data = SampleLoc_Nad83 %>% 
+            filter(!Grid.Number %in% seq(from = 1,
+                                         to = 1000,
+                                         by = 1)),
           pch = 20,
           size = 2,
           color = "black") +
@@ -251,7 +255,10 @@ Elodea_N_plot <- ggplot() +
 # > South Elodea Bucket ####
 Elodea_S_plot <- ggplot() +
   
-  geom_sf(data = SampleLoc_Nad83,
+  geom_sf(data = SampleLoc_Nad83 %>% 
+            filter(!Grid.Number %in% seq(from = 1,
+                                         to = 1000,
+                                         by = 1)),
           pch = 20,
           size = 2,
           color = "black") +
