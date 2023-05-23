@@ -46,7 +46,11 @@ usa <- subset(ne_countries(scale = 'medium',
 
 
 # > Collection Sites ####
-SampleLoc1 <- read.csv("./SampleLocations2019_ElodeaStudySacPond_20210923.csv")
+# 2018
+SampleLoc2018 <- read.csv("./AllSampleLocations_20180924.csv")
+
+# 2019
+SampleLoc2019 <- read.csv("./SampleLocations2019_ElodeaStudySacPond_20210923.csv")
 
 
 
@@ -83,8 +87,14 @@ usa_WGS <- st_transform(usa,
 
 
 # > Sample points ####
-SampleLoc_Nad83 <- st_transform(
-  st_as_sf(SampleLoc1,
+# 2018
+SampleLoc2018_Nad83 <- st_as_sf(SampleLoc2018,
+           coords = c("x", "y"),
+           crs = NAD83_crs)
+
+# 2019
+SampleLoc2019_Nad83 <- st_transform(
+  st_as_sf(SampleLoc2019,
            # coords = c("x.actualsamplelocation_utm","y.actualsamplelocation_utm"),
            coords = c("x.gridmidpoint_utm", "y.gridmidpoint_utm"),
            crs = "+proj=utm +zone=6 +ellps=WGS84"),
@@ -104,38 +114,71 @@ SampleLoc_Nad83 <- st_transform(
 
 bb = SACpond@bbox #= boundary box
 
-x <- seq(from = bb[1,1], 
-         to = bb[1,2], 
-         by = 12.5) 
-
-y <- seq(from = bb[2,1], 
-         to = 7187612.9, 
-         by = 12.5)
+# 2018
+x_2018 <- seq(from = 468485.8, to = 468645.6, by = 25) 
+y_2018 <- seq(from = 7187196.6, to = 7187612.9, by = 25) 
 
 ## create a grid of all pairs of coordinates (as a data.frame) 
-xy <- expand.grid(x = x, 
-                  y = y)
+xy_2018 <- expand.grid(x = x_2018, 
+                  y = y_2018)
 
-grid.pts <- SpatialPointsDataFrame(coords = xy, 
-                                   data = xy, 
-                                   proj4string = CRS(NAD83_crs))
+grid.pts_2018 <- SpatialPointsDataFrame(coords = xy_2018, 
+                                        data = xy_2018, 
+                                        proj4string = CRS(NAD83_crs))
 
-#Make points a gridded object (i.e., TRUE or FALSE)
-gridded(grid.pts) <- TRUE
+# Make points a gridded object (i.e., TRUE or FALSE)
+gridded(grid.pts_2018) <- TRUE
 
-grid_12.5 <- as(grid.pts, "SpatialPolygons") %>%
+grid_25 <- as(grid.pts_2018, "SpatialPolygons") %>%
   st_as_sf()
 
 
 
-# > Identify grid cells sampled ####
-index <- which(lengths(st_intersects(grid_12.5,
-                  SampleLoc_Nad83)) > 0)
+# > Identify grid cells sampled 2018 ####
+index_2018 <- which(lengths(st_intersects(grid_25,
+                                          SampleLoc2018_Nad83)) > 0)
 
 
 
-# > Select grid cells sampled ####
-grid_sampled <- grid_12.5$geometry[index] %>% 
+# > Select grid cells sampled 2018 ####
+grid_sampled_2018 <- grid_25$geometry[index_2018] %>% 
+  st_as_sf()
+
+
+
+# 2019
+x_2019 <- seq(from = bb[1,1], 
+         to = bb[1,2], 
+         by = 12.5) 
+
+y_2019 <- seq(from = bb[2,1], 
+         to = 7187612.9, 
+         by = 12.5)
+
+## create a grid of all pairs of coordinates (as a data.frame) 
+xy_2019 <- expand.grid(x = x_2019, 
+                  y = y_2019)
+
+grid.pts_2019 <- SpatialPointsDataFrame(coords = xy_2019, 
+                                   data = xy_2019, 
+                                   proj4string = CRS(NAD83_crs))
+
+# Make points a gridded object (i.e., TRUE or FALSE)
+gridded(grid.pts_2019) <- TRUE
+
+grid_12.5 <- as(grid.pts_2019, "SpatialPolygons") %>%
+  st_as_sf()
+
+
+
+# > Identify grid cells sampled 2019 ####
+index_2019 <- which(lengths(st_intersects(grid_12.5,
+                  SampleLoc2019_Nad83)) > 0)
+
+
+
+# > Select grid cells sampled 2019 ####
+grid_sampled_2019 <- grid_12.5$geometry[index_2019] %>% 
   st_as_sf()
 
 
@@ -170,13 +213,60 @@ Alaska_plot <- ggplot() +
 
 
 
-# > Study area map ####
-SACpond_plot <- ggplot() +
+# > Study area map 2018 ####
+SACpond_2018_plot <- ggplot() +
+  
+  geom_sf(data = grid_25, 
+          fill = NA) +
+  
+  geom_sf(data = grid_sampled_2018,
+          fill = "grey") +
+  
+  # geom_sf(data = SampleLoc_Nad83, # Overlay actual sample points
+  #   pch = 20,
+  #   size = 2,
+  #   color = "black") +
+  
+  geom_sf(data = ElodeaBuckets,
+          aes(geometry = geometry),
+          size = 2,
+          fill = "#6E6E6E",
+          color = "black",
+          pch = 23) +
+  
+  geom_sf(data = SACpond_NAD,
+          mapping = aes(geometry = geometry),
+          fill = NA) +
+  
+  ggspatial::annotation_scale(
+    location = "tr",
+    bar_cols = c("grey60", "white"),
+    text_family = "ArcherPro Book") +
+  
+  ggspatial::annotation_north_arrow(
+    location = "tr", 
+    which_north = "true",
+    pad_x = unit(0.4, "in"), 
+    pad_y = unit(0.4, "in"),
+    style = ggspatial::north_arrow_nautical(
+      fill = c("grey40", "white"),
+      line_col = "grey20",
+      text_family = "ArcherPro Book")) +
+  
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank())
+
+
+
+# > Study area map 2019 ####
+SACpond_2019_plot <- ggplot() +
   
   geom_sf(data = grid_12.5, 
           fill = NA) +
   
-  geom_sf(data = grid_sampled,
+  geom_sf(data = grid_sampled_2019,
           fill = "grey") +
   
   # geom_sf(data = SampleLoc_Nad83, # Overlay actual sample points
@@ -220,7 +310,7 @@ SACpond_plot <- ggplot() +
 # > North Elodea Bucket ####
 Elodea_N_plot <- ggplot() +
   
-  geom_sf(data = SampleLoc_Nad83 %>% 
+  geom_sf(data = SampleLoc2019_Nad83 %>% 
             filter(!Grid.Number %in% seq(from = 1,
                                          to = 1000,
                                          by = 1)),
@@ -255,7 +345,7 @@ Elodea_N_plot <- ggplot() +
 # > South Elodea Bucket ####
 Elodea_S_plot <- ggplot() +
   
-  geom_sf(data = SampleLoc_Nad83 %>% 
+  geom_sf(data = SampleLoc2019_Nad83 %>% 
             filter(!Grid.Number %in% seq(from = 1,
                                          to = 1000,
                                          by = 1)),
@@ -287,8 +377,9 @@ Elodea_S_plot <- ggplot() +
 
 
 # > Put it together ####
-SACpond_InsetMap <- ggdraw(xlim = c(0, 28),
-                           ylim = c(0, 20)) +
+# 2018
+SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
+                                ylim = c(0, 20)) +
   
   draw_plot(Alaska_plot,
             x = 0,
@@ -296,7 +387,7 @@ SACpond_InsetMap <- ggdraw(xlim = c(0, 28),
             width = 10,
             height = 10) +
   
-  draw_plot(SACpond_plot,
+  draw_plot(SACpond_2018_plot,
             x = 8,
             y = 0,
             width = 15, # 23,
@@ -353,7 +444,7 @@ SACpond_InsetMap <- ggdraw(xlim = c(0, 28),
                lineend = "butt",
                linewidth = 0.5)
 
-ggsave(filename = "./Figures/SACpond_InsertMap.jpg",
+ggsave(filename = "./Figures/SACpond_2018_InsetMap.jpg",
        plot = SACpond_InsetMap,
        dpi = 600,
        width = 8,
@@ -361,30 +452,75 @@ ggsave(filename = "./Figures/SACpond_InsertMap.jpg",
 
 
 
-# ###several points slightly outside of water, so manually snapped on to pond
-# 
-# SampleLoc1$y.actualsamplelocation_utm[1]<-7187606
-# SampleLoc1$y.actualsamplelocation_utm[2]<-7187602
-# SampleLoc1$x.actualsamplelocation_utm[6]<-468515
-# SampleLoc1$x.actualsamplelocation_utm[9]<-468507
-# SampleLoc1$x.actualsamplelocation_utm[14]<-468504
-# SampleLoc1$x.actualsamplelocation_utm[17]<-468502
-# SampleLoc1$x.actualsamplelocation_utm[19]<-468498
-# SampleLoc1$y.actualsamplelocation_utm[4]<-7187606
-# SampleLoc1$y.actualsamplelocation_utm[5]<-7187602
-# SampleLoc1$x.actualsamplelocation_utm[8]<-468566
-# SampleLoc1$x.actualsamplelocation_utm[21]<-468488
-# SampleLoc1$x.actualsamplelocation_utm[23]<-468490
-# SampleLoc1$y.actualsamplelocation_utm[28]<-7187244
-# SampleLoc1$y.actualsamplelocation_utm[29]<-7187238
-# SampleLoc1$y.actualsamplelocation_utm[30]<-7187238
-# SampleLoc1$y.actualsamplelocation_utm[31]<-7187240
-# SampleLoc1$y.actualsamplelocation_utm[32]<-7187240
-# SampleLoc1$y.actualsamplelocation_utm[33]<-7187240
-# SampleLoc1$x.actualsamplelocation_utm[36]<-468570
-# SampleLoc1$x.actualsamplelocation_utm[38]<-468571
-# SampleLoc1$x.actualsamplelocation_utm[18]<-468610
-# SampleLoc1$x.actualsamplelocation_utm[20]<-468622
-# SampleLoc <- data.frame( 
-#   lon = SampleLoc1$y.actualsamplelocation_utm, 
-#   lat = SampleLoc1$x.actualsamplelocation_utm)
+# 2019
+SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
+                           ylim = c(0, 20)) +
+  
+  draw_plot(Alaska_plot,
+            x = 0,
+            y = 10,
+            width = 10,
+            height = 10) +
+  
+  draw_plot(SACpond_2019_plot,
+            x = 8,
+            y = 0,
+            width = 15, # 23,
+            height = 20) + #20) +
+  
+  draw_plot(Elodea_N_plot,
+            x = 22,
+            y = 10,
+            width = 5,
+            height = 10) +
+  
+  draw_plot(Elodea_S_plot,
+            x = 22,
+            y = 0,
+            width = 5,
+            height = 10) +
+  
+  geom_segment(aes(x = x2,
+                   y = y2,
+                   xend = x1,
+                   yend = y1),
+               data = data.frame(x1 = 6.5,
+                                 x2 = 7.5,
+                                 y1 = 16.4,
+                                 y2 = 17.4),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
+               lineend = "butt",
+               linewidth = 0.5) +
+  
+  geom_segment(aes(x = x2,
+                   y = y2,
+                   xend = x1,
+                   yend = y1),
+               data = data.frame(x1 = 22,
+                                 x2 = 13,
+                                 y1 = 15,
+                                 y2 = 18.2),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
+               lineend = "butt",
+               linewidth = 0.5) +
+  
+  geom_segment(aes(x = x2,
+                   y = y2,
+                   xend = x1,
+                   yend = y1),
+               data = data.frame(x1 = 22,
+                                 x2 = 15.2,
+                                 y1 = 5.5,
+                                 y2 = 3.6),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
+               lineend = "butt",
+               linewidth = 0.5)
+
+ggsave(filename = "./Figures/SACpond_2019_InsetMap.jpg",
+       plot = SACpond_InsetMap,
+       dpi = 600,
+       width = 8,
+       height = 7)
