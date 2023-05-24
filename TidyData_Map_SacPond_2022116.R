@@ -378,7 +378,7 @@ Elodea_S_plot <- ggplot() +
 
 # > Put it together ####
 # 2018
-SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
+SACpond_2018_InsetMap <- ggdraw(xlim = c(0, 28),
                                 ylim = c(0, 20)) +
   
   draw_plot(Alaska_plot,
@@ -393,19 +393,7 @@ SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
             width = 15, # 23,
             height = 20) + #20) +
   
-  draw_plot(Elodea_N_plot,
-            x = 22,
-            y = 10,
-            width = 5,
-            height = 10) +
-  
-  draw_plot(Elodea_S_plot,
-            x = 22,
-            y = 0,
-            width = 5,
-            height = 10) +
-  
-  geom_segment(aes(x = x2,
+   geom_segment(aes(x = x2,
                    y = y2,
                    xend = x1,
                    yend = y1),
@@ -416,36 +404,10 @@ SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
                arrow = arrow(type = "closed",
                              length = unit(.1, "inches")),
                lineend = "butt",
-               linewidth = 0.5) +
+               linewidth = 0.5) 
   
-  geom_segment(aes(x = x2,
-                   y = y2,
-                   xend = x1,
-                   yend = y1),
-               data = data.frame(x1 = 22,
-                                 x2 = 13,
-                                 y1 = 15,
-                                 y2 = 18.2),
-               arrow = arrow(type = "closed",
-                             length = unit(.1, "inches")),
-               lineend = "butt",
-               linewidth = 0.5) +
-  
-  geom_segment(aes(x = x2,
-                   y = y2,
-                   xend = x1,
-                   yend = y1),
-               data = data.frame(x1 = 22,
-                                 x2 = 15.2,
-                                 y1 = 5.5,
-                                 y2 = 3.6),
-               arrow = arrow(type = "closed",
-                             length = unit(.1, "inches")),
-               lineend = "butt",
-               linewidth = 0.5)
-
 ggsave(filename = "./Figures/SACpond_2018_InsetMap.jpg",
-       plot = SACpond_InsetMap,
+       plot = SACpond_2018_InsetMap,
        dpi = 600,
        width = 8,
        height = 7)
@@ -520,7 +482,7 @@ SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
                linewidth = 0.5)
 
 ggsave(filename = "./Figures/SACpond_2019_InsetMap.jpg",
-       plot = SACpond_InsetMap,
+       plot = SACpond_2019_InsetMap,
        dpi = 600,
        width = 8,
        height = 7)
