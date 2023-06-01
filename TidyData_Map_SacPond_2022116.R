@@ -115,7 +115,7 @@ SampleLoc2019_Nad83 <- st_transform(
 bb = SACpond@bbox #= boundary box
 
 # 2018
-x_2018 <- seq(from = 468485.8, to = 468645.6, by = 25) 
+x_2018 <- seq(from = 468485.8, to = 468670.6, by = 25) # changed "to" from 468645.6 to expand grid to encompass lake boundary
 y_2018 <- seq(from = 7187196.6, to = 7187612.9, by = 25) 
 
 ## create a grid of all pairs of coordinates (as a data.frame) 
@@ -194,13 +194,13 @@ Alaska_plot <- ggplot() +
 
   geom_sf(data = st_bbox(
     st_buffer(SACpond_WGS,
-              dist = 10000)) %>% # add buffer so we can see on map
+              dist = 15000)) %>% # add buffer so we can see on map
       st_as_sfc() %>%
       st_as_sf(),
     fill = "black") + 
   
   scale_x_continuous(breaks = seq(-180, -130, 
-                                  by = 10)) +
+                                  by = 15)) +
   
   scale_y_continuous(breaks = seq(50, 70, 
                                   by = 5)) +
@@ -209,7 +209,15 @@ Alaska_plot <- ggplot() +
            ylim = c(50, 73),
            crs = WGS84_crs) +
   
-  theme_bw()
+  theme(axis.title.x =  element_blank(),
+        axis.title.y = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        text = element_text(size = 8.5))
+  
+  
 
 
 
@@ -242,16 +250,16 @@ SACpond_2018_plot <- ggplot() +
     location = "tr",
     bar_cols = c("grey60", "white"),
     text_family = "ArcherPro Book") +
-  
-  ggspatial::annotation_north_arrow(
-    location = "tr", 
-    which_north = "true",
-    pad_x = unit(0.4, "in"), 
-    pad_y = unit(0.4, "in"),
-    style = ggspatial::north_arrow_nautical(
-      fill = c("grey40", "white"),
-      line_col = "grey20",
-      text_family = "ArcherPro Book")) +
+
+  # ggspatial::annotation_north_arrow(
+  #   location = "tr",
+  #   which_north = "true",
+  #   pad_x = unit(0.4, "in"),
+  #   pad_y = unit(0.4, "in"),
+  #   style = ggspatial::north_arrow_nautical(
+  #     fill = c("grey40", "white"),
+  #     line_col = "grey20",
+  #     text_family = "ArcherPro Book")) +
   
   theme(axis.text.x = element_blank(),
         axis.text.y = element_blank(),
@@ -289,16 +297,16 @@ SACpond_2019_plot <- ggplot() +
     location = "tr",
     bar_cols = c("grey60", "white"),
     text_family = "ArcherPro Book") +
-  
-  ggspatial::annotation_north_arrow(
-    location = "tr", 
-    which_north = "true",
-    pad_x = unit(0.4, "in"), 
-    pad_y = unit(0.4, "in"),
-    style = ggspatial::north_arrow_nautical(
-      fill = c("grey40", "white"),
-      line_col = "grey20",
-      text_family = "ArcherPro Book")) +
+  # 
+  # ggspatial::annotation_north_arrow(
+  #   location = "tr", 
+  #   which_north = "true",
+  #   pad_x = unit(0.4, "in"), 
+  #   pad_y = unit(0.4, "in"),
+  #   style = ggspatial::north_arrow_nautical(
+  #     fill = c("grey40", "white"),
+  #     line_col = "grey20",
+  #     text_family = "ArcherPro Book")) +
   
   theme(axis.text.x = element_blank(),
         axis.text.y = element_blank(),
@@ -307,182 +315,200 @@ SACpond_2019_plot <- ggplot() +
 
 
 
-# > North Elodea Bucket ####
-Elodea_N_plot <- ggplot() +
-  
-  geom_sf(data = SampleLoc2019_Nad83 %>% 
-            filter(!Grid.Number %in% seq(from = 1,
-                                         to = 1000,
-                                         by = 1)),
-          pch = 20,
-          size = 2,
-          color = "black") +
-  
-  geom_sf(data = ElodeaBuckets,
-          aes(geometry = geometry),
-          size = 2,
-          fill = "#6E6E6E",
-          color = "black",
-          pch = 23) +
-  
-  coord_sf(xlim = c(468524.1, 468530.1),       
-           ylim = c(7187594, 7187601),
-           crs = NAD83_crs) +
-  
-  ggspatial::annotation_scale(
-    location = "tr",
-    bar_cols = c("grey60", "white"),
-    text_family = "ArcherPro Book") +
+# # > North Elodea Bucket ####
+# Elodea_N_plot <- ggplot() +
+#   
+#   geom_sf(data = SampleLoc2019_Nad83 %>% 
+#             filter(!Grid.Number %in% seq(from = 1,
+#                                          to = 1000,
+#                                          by = 1)),
+#           pch = 20,
+#           size = 2,
+#           color = "black") +
+#   
+#   geom_sf(data = ElodeaBuckets,
+#           aes(geometry = geometry),
+#           size = 2,
+#           fill = "#6E6E6E",
+#           color = "black",
+#           pch = 23) +
+#   
+#   coord_sf(xlim = c(468524.1, 468530.1),       
+#            ylim = c(7187594, 7187601),
+#            crs = NAD83_crs) +
+#   
+#   ggspatial::annotation_scale(
+#     location = "tr",
+#     bar_cols = c("grey60", "white"),
+#     text_family = "ArcherPro Book") +
+# 
+#   theme(axis.text.x = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.ticks = element_blank(),
+#         rect = element_blank(),
+#         plot.background = element_rect(color = "black", linewidth = 1))
+# 
+# 
+# 
+# # > South Elodea Bucket ####
+# Elodea_S_plot <- ggplot() +
+#   
+#   geom_sf(data = SampleLoc2019_Nad83 %>% 
+#             filter(!Grid.Number %in% seq(from = 1,
+#                                          to = 1000,
+#                                          by = 1)),
+#           pch = 20,
+#           size = 2,
+#           color = "black") +
+#   
+#   geom_sf(data = ElodeaBuckets,
+#           aes(geometry = geometry),
+#           size = 2,
+#           fill = "#6E6E6E",
+#           color = "black",
+#           pch = 23) +
+#   
+#   coord_sf(xlim = c(468569.7, 468574.7), 
+#            ylim = c(7187241, 7187247),
+#            crs = NAD83_crs) +
+#   
+#   ggspatial::annotation_scale(
+#     location = "tr",
+#     bar_cols = c("grey60", "white"),
+#     text_family = "ArcherPro Book") +
+# 
+#   theme(axis.text.x = element_blank(),
+#         axis.text.y = element_blank(),
+#         axis.ticks = element_blank(),
+#         rect = element_blank(),
+#         plot.background = element_rect(color = "black", linewidth = 1))
+# 
+# 
+# # > Put it together ####
+# # 2018
+# SACpond_2018_InsetMap <- ggdraw(xlim = c(0, 28),
+#                                 ylim = c(0, 20)) +
+#   
+#   draw_plot(Alaska_plot,
+#             x = 0,
+#             y = 10,
+#             width = 10,
+#             height = 10) +
+#   
+#   draw_plot(SACpond_2018_plot,
+#             x = 8,
+#             y = 0,
+#             width = 15, # 23,
+#             height = 20) + #20) +
+#   
+#    geom_segment(aes(x = x2,
+#                    y = y2,
+#                    xend = x1,
+#                    yend = y1),
+#                data = data.frame(x1 = 6.5,
+#                                  x2 = 7.5,
+#                                  y1 = 16.4,
+#                                  y2 = 17.4),
+#                arrow = arrow(type = "closed",
+#                              length = unit(.1, "inches")),
+#                lineend = "butt",
+#                linewidth = 0.5) 
+#   
+# ggsave(filename = "./Figures/SACpond_2018_InsetMap.jpg",
+#        plot = SACpond_2018_InsetMap,
+#        dpi = 600,
+#        width = 8,
+#        height = 7)
+# 
+# 
+# 
+# # 2019
+# SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
+#                            ylim = c(0, 20)) +
+#   
+#   draw_plot(Alaska_plot,
+#             x = 0,
+#             y = 10,
+#             width = 10,
+#             height = 10) +
+#   
+#   draw_plot(SACpond_2019_plot,
+#             x = 8,
+#             y = 0,
+#             width = 15, # 23,
+#             height = 20) + #20) +
+#   
+#   draw_plot(Elodea_N_plot,
+#             x = 22,
+#             y = 10,
+#             width = 5,
+#             height = 10) +
+#   
+#   draw_plot(Elodea_S_plot,
+#             x = 22,
+#             y = 0,
+#             width = 5,
+#             height = 10) +
+#   
+#   geom_segment(aes(x = x2,
+#                    y = y2,
+#                    xend = x1,
+#                    yend = y1),
+#                data = data.frame(x1 = 6.5,
+#                                  x2 = 7.5,
+#                                  y1 = 16.4,
+#                                  y2 = 17.4),
+#                arrow = arrow(type = "closed",
+#                              length = unit(.1, "inches")),
+#                lineend = "butt",
+#                linewidth = 0.5) +
+#   
+#   geom_segment(aes(x = x2,
+#                    y = y2,
+#                    xend = x1,
+#                    yend = y1),
+#                data = data.frame(x1 = 22,
+#                                  x2 = 13,
+#                                  y1 = 15,
+#                                  y2 = 18.2),
+#                arrow = arrow(type = "closed",
+#                              length = unit(.1, "inches")),
+#                lineend = "butt",
+#                linewidth = 0.5) +
+#   
+#   geom_segment(aes(x = x2,
+#                    y = y2,
+#                    xend = x1,
+#                    yend = y1),
+#                data = data.frame(x1 = 22,
+#                                  x2 = 15.2,
+#                                  y1 = 5.5,
+#                                  y2 = 3.6),
+#                arrow = arrow(type = "closed",
+#                              length = unit(.1, "inches")),
+#                lineend = "butt",
+#                linewidth = 0.5)
+# 
+# ggsave(filename = "./Figures/SACpond_2019_InsetMap.jpg",
+#        plot = SACpond_2019_InsetMap,
+#        dpi = 600,
+#        width = 8,
+#        height = 7)
 
-  theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        rect = element_blank(),
-        plot.background = element_rect(color = "black", linewidth = 1))
 
 
+# Combo
+Combo_plot <- cowplot::plot_grid(SACpond_2018_plot,
+                                 SACpond_2019_plot,
+                                 cowplot::plot_grid(Alaska_plot, NA,
+                                                    nrow = 2,
+                                                    rel_heights = c(.5, .5)),
+                                 ncol = 3,
+                                 rel_widths = c(.4, .4, .2),
+                                 rel_heights = c(1, 1, .5))
 
-# > South Elodea Bucket ####
-Elodea_S_plot <- ggplot() +
-  
-  geom_sf(data = SampleLoc2019_Nad83 %>% 
-            filter(!Grid.Number %in% seq(from = 1,
-                                         to = 1000,
-                                         by = 1)),
-          pch = 20,
-          size = 2,
-          color = "black") +
-  
-  geom_sf(data = ElodeaBuckets,
-          aes(geometry = geometry),
-          size = 2,
-          fill = "#6E6E6E",
-          color = "black",
-          pch = 23) +
-  
-  coord_sf(xlim = c(468569.7, 468574.7), 
-           ylim = c(7187241, 7187247),
-           crs = NAD83_crs) +
-  
-  ggspatial::annotation_scale(
-    location = "tr",
-    bar_cols = c("grey60", "white"),
-    text_family = "ArcherPro Book") +
-
-  theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks = element_blank(),
-        rect = element_blank(),
-        plot.background = element_rect(color = "black", linewidth = 1))
-
-
-# > Put it together ####
-# 2018
-SACpond_2018_InsetMap <- ggdraw(xlim = c(0, 28),
-                                ylim = c(0, 20)) +
-  
-  draw_plot(Alaska_plot,
-            x = 0,
-            y = 10,
-            width = 10,
-            height = 10) +
-  
-  draw_plot(SACpond_2018_plot,
-            x = 8,
-            y = 0,
-            width = 15, # 23,
-            height = 20) + #20) +
-  
-   geom_segment(aes(x = x2,
-                   y = y2,
-                   xend = x1,
-                   yend = y1),
-               data = data.frame(x1 = 6.5,
-                                 x2 = 7.5,
-                                 y1 = 16.4,
-                                 y2 = 17.4),
-               arrow = arrow(type = "closed",
-                             length = unit(.1, "inches")),
-               lineend = "butt",
-               linewidth = 0.5) 
-  
-ggsave(filename = "./Figures/SACpond_2018_InsetMap.jpg",
-       plot = SACpond_2018_InsetMap,
-       dpi = 600,
-       width = 8,
-       height = 7)
-
-
-
-# 2019
-SACpond_2019_InsetMap <- ggdraw(xlim = c(0, 28),
-                           ylim = c(0, 20)) +
-  
-  draw_plot(Alaska_plot,
-            x = 0,
-            y = 10,
-            width = 10,
-            height = 10) +
-  
-  draw_plot(SACpond_2019_plot,
-            x = 8,
-            y = 0,
-            width = 15, # 23,
-            height = 20) + #20) +
-  
-  draw_plot(Elodea_N_plot,
-            x = 22,
-            y = 10,
-            width = 5,
-            height = 10) +
-  
-  draw_plot(Elodea_S_plot,
-            x = 22,
-            y = 0,
-            width = 5,
-            height = 10) +
-  
-  geom_segment(aes(x = x2,
-                   y = y2,
-                   xend = x1,
-                   yend = y1),
-               data = data.frame(x1 = 6.5,
-                                 x2 = 7.5,
-                                 y1 = 16.4,
-                                 y2 = 17.4),
-               arrow = arrow(type = "closed",
-                             length = unit(.1, "inches")),
-               lineend = "butt",
-               linewidth = 0.5) +
-  
-  geom_segment(aes(x = x2,
-                   y = y2,
-                   xend = x1,
-                   yend = y1),
-               data = data.frame(x1 = 22,
-                                 x2 = 13,
-                                 y1 = 15,
-                                 y2 = 18.2),
-               arrow = arrow(type = "closed",
-                             length = unit(.1, "inches")),
-               lineend = "butt",
-               linewidth = 0.5) +
-  
-  geom_segment(aes(x = x2,
-                   y = y2,
-                   xend = x1,
-                   yend = y1),
-               data = data.frame(x1 = 22,
-                                 x2 = 15.2,
-                                 y1 = 5.5,
-                                 y2 = 3.6),
-               arrow = arrow(type = "closed",
-                             length = unit(.1, "inches")),
-               lineend = "butt",
-               linewidth = 0.5)
-
-ggsave(filename = "./Figures/SACpond_2019_InsetMap.jpg",
-       plot = SACpond_2019_InsetMap,
+ggsave(filename = "./Figures/SACpond_ComboMap.jpg",
+       plot = Combo_plot,
        dpi = 600,
        width = 8,
        height = 7)
