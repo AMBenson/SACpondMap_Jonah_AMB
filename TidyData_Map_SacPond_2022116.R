@@ -15,6 +15,8 @@ library(ggsn)
 library(dplyr)
 library(rgdal)
 library(sp)
+library(ggpattern)
+library(patchwork)
 
 
 
@@ -155,7 +157,7 @@ y_2019 <- seq(from = bb[2,1],
          to = 7187612.9, 
          by = 12.5)
 
-## create a grid of all pairs of coordinates (as a data.frame) 
+# create a grid of all pairs of coordinates (as a data.frame) 
 xy_2019 <- expand.grid(x = x_2019, 
                   y = y_2019)
 
@@ -179,6 +181,26 @@ index_2019 <- which(lengths(st_intersects(grid_12.5,
 
 # > Select grid cells sampled 2019 ####
 grid_sampled_2019 <- grid_12.5$geometry[index_2019] %>% 
+  st_as_sf()
+
+
+
+# > Identify grid cells sampled via transect in 2019 ####
+# Identify grid cells sampled. This needs to be tidied once input data is cleaned
+Transects_2019 <- SampleLoc2019_Nad83 %>% 
+  
+  filter(Grid.Number %in% c("5", "19", "21", "22", "33", "48", "54",
+                            "62", "77", "107", 
+                            as.character(seq(453, 458, by = 1)), "473",
+                            "488", "507", "583"))
+
+Transect_index_2019 <- which(lengths(st_intersects(grid_12.5,
+                                                   Transects_2019)) > 0)
+
+
+
+# > Select grid cells sampled 2019 via transects ####
+Transect_grid_sampled_2019 <- grid_12.5$geometry[Transect_index_2019] %>% 
   st_as_sf()
 
 
@@ -238,7 +260,8 @@ SACpond_2018_plot <- ggplot() +
   geom_sf(data = ElodeaBuckets,
           aes(geometry = geometry),
           size = 2,
-          fill = "#6E6E6E",
+          # fill = "#6E6E6E",
+          fill = "white",
           color = "black",
           pch = 23) +
   
@@ -277,6 +300,11 @@ SACpond_2019_plot <- ggplot() +
   geom_sf(data = grid_sampled_2019,
           fill = "grey") +
   
+  ggpattern::geom_sf_pattern(data = Transect_grid_sampled_2019,
+                             pattern = 'stripe',
+                             fill    = 'grey',
+                             colour  = 'black') +
+  
   # geom_sf(data = SampleLoc_Nad83, # Overlay actual sample points
   #   pch = 20,
   #   size = 2,
@@ -285,7 +313,7 @@ SACpond_2019_plot <- ggplot() +
   geom_sf(data = ElodeaBuckets,
           aes(geometry = geometry),
           size = 2,
-          fill = "#6E6E6E",
+          fill = "white",
           color = "black",
           pch = 23) +
 
@@ -513,8 +541,8 @@ SACpond_2019_plot <- ggplot() +
 #        width = 8,
 #        height = 7)
 
-library(patchwork)
-Combo_plot  <- ggdraw(xlim = c(0, 28),
+
+Combo_plot <- ggdraw(xlim = c(0, 28),
                       ylim = c(0, 20)) +
   
   draw_plot(Alaska_plot +
@@ -549,8 +577,8 @@ Combo_plot  <- ggdraw(xlim = c(0, 28),
   
   SACpond_2019_plot
 
-ggsave(filename = "./Figures/SACpond_ComboMap_test.jpg",
-       plot = Test_Combo_plot,
+ggsave(filename = "./Figures/SACpond_ComboMap.jpg",
+       plot = Combo_plot,
        dpi = 600,
        width = 8,
        height = 7)
