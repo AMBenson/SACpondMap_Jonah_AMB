@@ -497,18 +497,60 @@ SACpond_2019_plot <- ggplot() +
 
 
 
-# Combo
-Combo_plot <- cowplot::plot_grid(SACpond_2018_plot,
-                                 SACpond_2019_plot,
-                                 cowplot::plot_grid(Alaska_plot, NA,
-                                                    nrow = 2,
-                                                    rel_heights = c(.5, .5)),
-                                 ncol = 3,
-                                 rel_widths = c(.4, .4, .2),
-                                 rel_heights = c(1, 1, .5))
+# # Combo
+# Combo_plot <- cowplot::plot_grid(SACpond_2018_plot,
+#                                  SACpond_2019_plot,
+#                                  cowplot::plot_grid(Alaska_plot, NA,
+#                                                     nrow = 2,
+#                                                     rel_heights = c(.5, .5)),
+#                                  ncol = 3,
+#                                  rel_widths = c(.4, .4, .2),
+#                                  rel_heights = c(1, 1, .5))
+# 
+# ggsave(filename = "./Figures/SACpond_ComboMap.jpg",
+#        plot = Combo_plot,
+#        dpi = 600,
+#        width = 8,
+#        height = 7)
 
-ggsave(filename = "./Figures/SACpond_ComboMap.jpg",
-       plot = Combo_plot,
+library(patchwork)
+Combo_plot  <- ggdraw(xlim = c(0, 28),
+                      ylim = c(0, 20)) +
+  
+  draw_plot(Alaska_plot +
+              ggspatial::annotation_north_arrow(
+                location = "br",
+                which_north = "true",
+                pad_x = unit(0.1, "in"),
+                pad_y = unit(0.1, "in"),
+                style = ggspatial::north_arrow_nautical(
+                  fill = c("grey40", "white"),
+                  line_col = "grey20",
+                  text_family = "ArcherPro Book")),
+            x = 0,
+            y = 0,
+            width = 28, 
+            height = 20) + 
+  
+  geom_segment(aes(x = x2,
+                   y = y2,
+                   xend = x1,
+                   yend = y1),
+               data = data.frame(x1 = 27,
+                                 x2 = 18,
+                                 y1 = 13,
+                                 y2 = 11.5),
+               arrow = arrow(type = "closed",
+                             length = unit(.1, "inches")),
+               lineend = "butt",
+               linewidth = 0.5) + 
+  
+  SACpond_2018_plot + 
+  
+  SACpond_2019_plot
+
+ggsave(filename = "./Figures/SACpond_ComboMap_test.jpg",
+       plot = Test_Combo_plot,
        dpi = 600,
        width = 8,
        height = 7)
